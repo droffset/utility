@@ -35,7 +35,11 @@ union network_byte_storage
 public:
     network_byte_storage(T const & val)
     {
+#ifndef PGCPP2_BIG_ENDIAN
         reinterpret<T>::reverse(bytes, reinterpret_cast<char const *>(&val));
+#else
+        std::memcpy(bytes, &val, sizeof(T));
+#endif
     }
     network_byte_storage()
         : bytes()
