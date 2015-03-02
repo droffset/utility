@@ -8,7 +8,7 @@
 namespace pgcpp2
 {
 
-inline query_arg_empty query(PGconn * conn, char const * sql)
+inline query_arg_empty query(::PGconn * conn, char const * sql)
 {
     return query_arg_empty(conn, sql);
 }

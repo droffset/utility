@@ -14,6 +14,7 @@
 #define TEXTOID		25
 #define FLOAT4OID   700
 #define FLOAT8OID   701
+#define VARCHAROID  1043
 
 namespace pgcpp2
 {
@@ -21,7 +22,7 @@ namespace pgcpp2
 template <typename T>
 struct query_arg_traits
 {
-    enum { oid_type = TEXTOID };
+    enum { oid_type  = VARCHAROID };
     enum { is_binary = false };
 
     typedef T arg_type;

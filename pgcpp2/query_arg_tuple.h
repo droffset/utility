@@ -4,6 +4,8 @@
 #include <pgcpp2/query_info.h>
 #include <pgcpp2/query_result_converter.h>
 
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+
 namespace pgcpp2
 {
 
@@ -14,15 +16,6 @@ inline T const & pgcpp_adopt(T const & c) //for ADL
 {
     return c;
 }
-
-template <size_t ArgsCount>
-struct query_prepeared_data
-{
-    char const * args[ArgsCount];
-    int lens[ArgsCount];
-    int bins[ArgsCount];
-    ::Oid oids[ArgsCount];
-};
 
 namespace detail
 {
@@ -36,6 +29,15 @@ template <size_t Size>
 struct tuple_size<query_arg_empty, Size>
 {
     enum { value = Size };
+};
+
+template <size_t ArgsCount>
+struct query_prepeared_data
+{
+    char const * args[ArgsCount];
+    int lens[ArgsCount];
+    int bins[ArgsCount];
+    ::Oid oids[ArgsCount];
 };
 
 } // detail
@@ -54,7 +56,7 @@ public:
     {
         enum { count = detail::tuple_size<query_arg_tuple>::value };
 
-        query_prepeared_data<count> queryData;
+        detail::query_prepeared_data<count> queryData;
 
         query_info const & inf = fill(queryData);
 
@@ -74,7 +76,7 @@ public:
     { }
 
     template <size_t ArgsCount>
-    query_info const & fill(query_prepeared_data<ArgsCount> & queryData) const
+    query_info const & fill(detail::query_prepeared_data<ArgsCount> & queryData) const
     {
         enum { index = detail::tuple_size<query_arg_tuple>::value - 1 };
 
@@ -102,20 +104,21 @@ public:
 
 public:
     template <size_t ArgsCount>
-    query_info const & fill(query_prepeared_data<ArgsCount> &) const
+    query_info const & fill(detail::query_prepeared_data<ArgsCount> &) const
     {
         return inf_;
     }
 
-private:
     friend query_arg_empty query(::PGconn * conn, char const *);
     friend query_arg_empty query(pg_conn & conn, char const *);
 
-    query_arg_empty(PGconn * conn, char const * query)
-        : inf_(conn, query)
-    { }
-    query_arg_empty(query_arg_empty const & x) //disallow
+    query_arg_empty(query_arg_empty const & x) 
         : inf_(x.inf_)
+    { }
+
+private:
+    query_arg_empty(::PGconn * conn, char const * query)
+        : inf_(conn, query)
     { }
 
     query_arg_empty(); //disallow
@@ -123,7 +126,10 @@ private:
 
     query_info const inf_;
 };
+
 /*-*/
 } //pgcpp2
+
+#undef GCC_VERSION
 
 #endif // PGCPP_QUERY_ARG_TUPLE_H_INCLUDED

@@ -65,8 +65,19 @@ struct pg_result
     {
         return ::PQgetisnull(get(), row, field);
     }
-};
 
+    int status() const
+    {
+        return ::PQresultStatus(get());
+    }
+
+    char const * errorMessage() const
+    {
+        return ::PQresultErrorMessage(get());
+    }
+
+};
+/**/
 }
 
 #endif // PGCPP_PG_RESULT_H_INCLUDED
